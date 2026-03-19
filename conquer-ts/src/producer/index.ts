@@ -19,7 +19,7 @@ app.post("/enqueue",async (req,res)=> {
         const {type,payload,retries}=req.body;
 
         if(!type || typeof type !== "string"){
-            res.status(400).json({error:"type is required and must be a non empy string"})
+            res.status(400).json({error:"type is required and must be a non empty string"})
             return;
         }
 

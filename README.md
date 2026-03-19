@@ -27,6 +27,12 @@ Client (POST /enqueue) → Producer → Redis (task_queue) → Worker → Execut
 
 The worker runs multiple concurrent loops using `Promise.all` (configured via `WORKER_CONCURRENCY`). Each loop does a `BLPOP` on the Redis list which blocks until a task is available — so no polling or busy waiting.
 
+## Demo
+
+![Docker Build](conquer-ts/images/docker-build.png)
+
+![API Demo](conquer-ts/images/demo.png)
+
 ## Tech used
 
 - TypeScript + Node.js
