@@ -37,13 +37,22 @@ The worker runs multiple concurrent loops using `Promise.all` (configured via `W
 
 ## Setup
 
-You need Node.js and a running Redis instance. I used Docker:
+### Using Docker (skip everything below, just run)
+
+```bash
+cd conquer-ts
+docker compose up --build
+```
+
+### Manual setup
+
+You need Node.js and a running Redis instance. I used Docker for Redis:
 
 ```bash
 docker run -d --name redis-stack -p 6379:6379 -p 8001:8001 redis/redis-stack:latest
 ```
 
-Port 8001 gives you RedisInsight in the browser which is helpful for seeing what's in the queue(avoid this practice in production).
+Port 8001 gives you RedisInsight in the browser which is helpful for seeing what's in the queue (avoid this practice in production).
 
 Then:
 
@@ -63,7 +72,26 @@ WORKER_CONCURRENCY=3
 
 ## Running
 
-Open two terminals:
+### Option 1: Docker (recommended)
+
+Just need Docker installed. No Node.js, no Redis setup, nothing else.
+
+```bash
+cd conquer-ts
+docker compose up --build
+```
+
+This starts Redis, Producer (port 3000), and Worker (port 3001) automatically.
+
+To stop everything:
+
+```bash
+docker compose down
+```
+
+### Option 2: Manual
+
+You need Node.js and a running Redis instance. Open two terminals:
 
 ```bash
 # Terminal 1 - start the producer
@@ -129,6 +157,10 @@ conquer-ts/
 │       └── index.ts           # task processing loop, GET /metrics, GET /health
 ├── logs/
 │   └── worker.log
+├── Dockerfile.producer
+├── Dockerfile.worker
+├── docker-compose.yml
+├── .dockerignore
 ├── .env.example
 ├── package.json
 └── tsconfig.json
