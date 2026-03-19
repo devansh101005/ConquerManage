@@ -35,41 +35,6 @@ The worker runs multiple concurrent loops using `Promise.all` (configured via `W
 - dotenv for env config
 - fs module for logging
 
-## Setup
-
-### Using Docker (skip everything below, just run)
-
-```bash
-cd conquer-ts
-docker compose up --build
-```
-
-### Manual setup
-
-You need Node.js and a running Redis instance. I used Docker for Redis:
-
-```bash
-docker run -d --name redis-stack -p 6379:6379 -p 8001:8001 redis/redis-stack:latest
-```
-
-Port 8001 gives you RedisInsight in the browser which is helpful for seeing what's in the queue (avoid this practice in production).
-
-Then:
-
-```bash
-cd conquer-ts
-npm install
-```
-
-Copy `.env.example` to `.env` and fill in your values:
-
-```
-REDIS_URL=redis://localhost:6379/1
-PORT_PRODUCER=3000
-PORT_WORKER=3001
-WORKER_CONCURRENCY=3
-```
-
 ## Running
 
 ### Option 1: Docker (recommended)
@@ -91,7 +56,29 @@ docker compose down
 
 ### Option 2: Manual
 
-You need Node.js and a running Redis instance. Open two terminals:
+You need Node.js and a running Redis instance. I used Docker for Redis:
+
+```bash
+docker run -d --name redis-stack -p 6379:6379 -p 8001:8001 redis/redis-stack:latest
+```
+
+Port 8001 gives you RedisInsight in the browser which is helpful for seeing what's in the queue.
+
+```bash
+cd conquer-ts
+npm install
+```
+
+Copy `.env.example` to `.env` and fill in your values:
+
+```
+REDIS_URL=redis://localhost:6379/1
+PORT_PRODUCER=3000
+PORT_WORKER=3001
+WORKER_CONCURRENCY=3
+```
+
+Open two terminals:
 
 ```bash
 # Terminal 1 - start the producer
