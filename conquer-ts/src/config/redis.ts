@@ -1,4 +1,6 @@
-import Redis from "ioredis";
+// Named import, not default: ioredis is CJS but ships ESM-style .d.ts, so a
+// default import resolves to the module namespace rather than the class.
+import { Redis } from "ioredis";
 import dotenv from "dotenv"
 
 dotenv.config()
