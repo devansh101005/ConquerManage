@@ -25,7 +25,11 @@ Client (POST /enqueue) → Producer → Redis (task_queue) → Worker → Execut
                                                      retries = 0 → dead letter queue
 ```
 
-The worker runs multiple concurrent loops using `Promise.all` (configured via `WORKER_CONCURRENCY`). Each loop does a `BLPOP` on the Redis list which blocks until a task is available — so no polling or busy waiting.
+The worker runs multiple concurrent loops using `Promise.all` (configured via `WORKER_CONCURRENCY`). Each loop does a `BLPOP` on the Redis list, which blocks server-side until a task arrives — no polling, no busy waiting.
+
+**Each loop gets its own Redis connection.** This matters: a blocking `BLPOP` occupies its connection for the entire call, so loops sharing one client would serialise — loop 2 would sit in the client's send queue until loop 1's `BLPOP` returned. One connection per loop is what makes the concurrency real.
+
+`BLPOP` uses a 5-second timeout rather than blocking forever. On timeout it returns `null`, the loop continues, and — critically — it re-checks the shutdown flag. An infinite block would mean a worker parked on an idle queue never notices that shutdown was requested.
 
 ## Demo
 
@@ -162,7 +166,7 @@ conquer-ts/
 ## Features
 
 1. **Dead Letter Queue** — failed tasks (after all retries) go to `task_queue:dead` instead of disappearing
-2. **Graceful Shutdown** — worker stops cleanly on Ctrl+C, finishes current tasks before exiting
+2. **Graceful Shutdown** — handles both `SIGINT` (Ctrl+C) and `SIGTERM` (`docker stop`, k8s). Stops accepting new tasks, lets in-flight tasks finish, closes every Redis connection, then exits 0. An 8-second deadline (under Docker's 10s grace period) forces an exit if a task hangs, so the process ends on its own terms rather than being SIGKILLed mid-write.
 3. **Health checks** — both services have `/health` that pings Redis
 4. **Input validation** — producer validates each field with clear error messages
 5. **Task IDs** — every task gets a UUID, makes it easy to trace in logs
