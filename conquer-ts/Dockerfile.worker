@@ -4,4 +4,6 @@ COPY package*.json ./
 RUN npm install
 COPY . .
 RUN mkdir -p logs
-CMD ["npx","tsx","src/worker/index.ts"]
+# Invoke the binary directly, not via npx: npx sits as PID 1 and does not
+# reliably forward SIGTERM to its child, which would defeat graceful shutdown.
+CMD ["./node_modules/.bin/tsx","src/worker/index.ts"]
